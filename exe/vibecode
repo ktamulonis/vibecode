@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require "vibecode/cli"
+Vibecode::CLI.start(ARGV)
+

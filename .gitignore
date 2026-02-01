@@ -1,0 +1,33 @@
+# Bundler
+/.bundle/
+
+# Yard docs
+/.yardoc
+/_yardoc/
+/doc/
+
+# Coverage
+/coverage/
+
+# Build artifacts
+/pkg/
+
+# Test reports
+/spec/reports/
+
+# Temp files
+/tmp/
+
+# macOS
+.DS_Store
+
+# Vim / editors
+*.swp
+*.swo
+
+# Logs
+*.log
+
+.vibecode/
+config.json
+
