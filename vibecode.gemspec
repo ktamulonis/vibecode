@@ -5,8 +5,8 @@ require_relative "lib/vibecode/version"
 Gem::Specification.new do |spec|
   spec.name = "vibecode"
   spec.version = Vibecode::VERSION
-  spec.authors = ["Kurt Tamulonis"]
-  spec.email = ["kurttamulonis@gmail.com"]
+  spec.authors = ["hackliteracy"]
+  spec.email = ["hackliteracy@gmail.com"]
 
   spec.summary = "TODO: Write a short summary, because RubyGems requires one."
   spec.description = "TODO: Write a longer description or delete this line."
