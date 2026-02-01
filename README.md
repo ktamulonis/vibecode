@@ -1,32 +1,39 @@
 # Vibecode
 
-**Vibecode** is a terminal-based AI coding agent powered by local LLMs through [Ollama](https://ollama.com). It can read your project files, propose edits with diffs, and run Git commands — all with your approval.
+**Vibecode** is a terminal-native AI coding agent powered by local LLMs through **Ollama**.
 
-Think of it as a **local, open-source Codex-style coding assistant** that runs directly in your terminal.
+It can read your project, propose edits with diffs, create new files intelligently, and even run Ruby code it writes — all with your approval.
+
+Think of it as:
+
+> A local, open-source, Codex-style coding assistant that lives in your terminal.
+
+No cloud. No API keys. No data leaving your machine.
 
 ---
 
 ## ✨ Features
 
-* 🧠 Uses local coding models via Ollama
-* 📂 Reads and understands your current project directory
+* 🧠 Uses local coding models via **Ollama**
+* 📂 Understands your current project directory
 * ✏️ Proposes file edits with colorized diffs
-* 🔒 Asks before modifying files or running Git commands
-* 🌿 Git-aware (status, branches, commits, push, etc.)
+* 🆕 Creates smartly named new files (no fake `path/to/file.rb`)
+* ▶️ Runs Ruby files automatically when appropriate
+* 🔒 Requires approval before writing files
+* 🌿 Git integration only when **you** ask for it
 * 🔄 Switch models anytime
 
 ---
 
 ## 🧰 Requirements
 
-Before installing Vibecode, make sure you have:
+You need:
 
-* **Ruby 3.0+**
-* **Bundler**
-* **Git**
-* **Ollama** installed and working
+* Ruby **3.0+**
+* Git
+* Ollama
 
-Install Ollama from:
+Install Ollama:
 
 👉 [https://ollama.com/download](https://ollama.com/download)
 
@@ -38,43 +45,13 @@ ollama serve
 
 ---
 
-## 🚀 Local Installation (Development Mode)
-
-From the Vibecode project directory:
+## 🚀 Install from RubyGems
 
 ```bash
-bundle install
-chmod +x exe/vibecode
+gem install vibecode
 ```
 
-Run directly without installing the gem:
-
-```bash
-bundle exec exe/vibecode
-```
-
----
-
-## 📦 Install as a Local Gem
-
-From the project root:
-
-```bash
-gem build vibecode.gemspec
-gem install ./vibecode-*.gem
-```
-
-Then you can run from anywhere:
-
-```bash
-vibecode
-```
-
----
-
-## 🩺 System Check
-
-Verify everything is connected properly:
+Verify:
 
 ```bash
 vibecode -doctor
@@ -92,19 +69,19 @@ Git installed               OK
 
 ## 🤖 Managing Models
 
-### List installed models
+List installed models:
 
 ```bash
 vibecode -list
 ```
 
-### Use a model (auto-pulls if missing)
+Switch models (auto-pulls if missing):
 
 ```bash
 vibecode -use qwen2.5-coder:7b
 ```
 
-### Manually pull a model
+Manually pull a model:
 
 ```bash
 vibecode -pull deepseek-coder:6.7b
@@ -120,122 +97,146 @@ Your active model is stored in:
 
 ## 💬 Starting an AI Coding Session
 
-From any project directory:
+From **any project directory**:
 
 ```bash
 vibecode
 ```
 
-You will see:
+You’ll see:
 
 ```
-Vibecode Agent using model: qwen2.5-coder:7b
+Vibecode Agent using model: ...
 vibecode>
 ```
 
-Now you can give natural language coding instructions.
+Now you can type natural coding requests.
 
 Example:
 
 ```
-vibecode> create a ruby method called greet that prints hello world
+create a ruby method greet that prints hello world
 ```
+
+Vibecode will:
+
+1. Show a plan
+2. Show a diff preview
+3. Ask for approval
+4. Create a properly named file like `hello_world.rb`
+5. Run the Ruby file automatically
+6. Show the output
 
 ---
 
 ## 🧠 How Vibecode Works
 
-The AI responds using structured instructions that Vibecode turns into real actions.
+The AI responds using a structured format that Vibecode turns into actions.
 
-### AI Can Request to Read Files
+### Reading files
 
-Vibecode will load the file and send contents back to the AI.
+If the AI needs to see a file, Vibecode loads it and sends the contents back.
 
-### AI Can Propose File Changes
+### Creating new files
 
-You will see a **diff preview** before any file is modified.
+If the AI wants to edit a file that doesn’t exist, Vibecode generates a smart filename automatically.
 
-You must approve changes before they are applied.
+### Editing files
 
-### AI Can Suggest Git Commands
+You always see a diff before anything is written.
 
-Examples:
+### Running Ruby
 
-* `git status`
-* `git checkout -b feature/login`
-* `git add .`
-* `git commit -m "Add login feature"`
-* `git push origin feature/login`
+If the file contains top-level execution, Vibecode runs:
 
-You must approve each command before it runs.
+```bash
+ruby filename.rb
+```
+
+…and shows the output to both you and the AI.
+
+### Git
+
+Vibecode will **never** run git unless your prompt contains the word `git`.
 
 ---
 
 ## 🔒 Safety Model
 
-Vibecode is **human-in-the-loop by default**.
+| Action        | Requires Approval                 |
+| ------------- | --------------------------------- |
+| Reading files | ❌                                 |
+| Writing files | ✅                                 |
+| Running Ruby  | Automatic (only when appropriate) |
+| Running Git   | Only if you ask                   |
 
-| Action               | Requires Approval |
-| -------------------- | ----------------- |
-| Reading files        | ❌                 |
-| Editing files        | ✅                 |
-| Running Git commands | ✅                 |
-| Pushing to remote    | ✅                 |
-
-Vibecode **cannot access files outside your current directory**.
+Vibecode **cannot access files outside** the current directory.
 
 ---
 
-## 🗂 Project Awareness
+## 🧪 Example Session
 
-Each time you prompt Vibecode, it automatically sends the AI:
+```
+vibecode> create a ruby method greet that prints hello world
+```
 
-* Your project file tree
-* Relevant file contents (when needed)
-* Conversation history
+Output:
 
-This allows the AI to reason about your codebase like a real assistant.
+```
+Proposed edit for hello_world.rb
++def greet
++  puts "hello world"
++end
 
----
+Vibecode plans to:
+- create file hello_world.rb
+- run ruby hello_world.rb
+Proceed? (Y/n)
+```
 
-## 🛠 Internal Architecture (For Contributors)
+After approval:
 
-| Component      | Responsibility                           |
-| -------------- | ---------------------------------------- |
-| `CLI`          | Handles commands and interactive session |
-| `OllamaClient` | Talks to Ollama HTTP API                 |
-| `Agent`        | AI reasoning loop + instruction parsing  |
-| `Workspace`    | Safe file reading/writing with diffs     |
-| `Git`          | Safe Git command execution               |
-
----
-
-## 🧪 Example Workflow
-
-1. Start Vibecode in your repo
-2. Ask for a feature
-3. Vibecode proposes edits
-4. You approve
-5. Vibecode runs Git commands
-6. You review and push
+```
+hello world
+```
 
 ---
 
-## 🧭 Roadmap Ideas
+## 🛠 Internal Architecture
 
-* Streaming model responses
-* Auto-approve mode
-* Test runner integration
-* Linter auto-fix mode
-* Pull request description generator
+| Component    | Responsibility                    |
+| ------------ | --------------------------------- |
+| CLI          | Command handling + session        |
+| OllamaClient | Talks to Ollama HTTP API          |
+| Agent        | Planning, parsing, execution flow |
+| Workspace    | Safe file system + Ruby execution |
+| Git          | Safe Git command wrapper          |
 
 ---
 
 ## ❤️ Philosophy
 
-Vibecode keeps your code and AI **local, private, and developer-controlled**.
+Vibecode is:
 
-No cloud. No tracking. Just you and your AI pair programmer in the terminal.
+* Local-first
+* Developer-controlled
+* Human-in-the-loop
+* Transparent
+* Offline-capable
+
+You stay in charge. The AI assists.
+
+---
+
+## 🧭 Roadmap
+
+Future improvements:
+
+* Streaming model responses
+* Session memory
+* Auto-approve mode
+* Test runner integration
+* Linter / formatter mode
 
 ---
 
