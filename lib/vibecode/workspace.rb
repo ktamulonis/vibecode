@@ -4,6 +4,7 @@ require "tty-prompt"
 require "pastel"
 require "diffy"
 require "open3"
+require "tty-reader"
 
 module Vibecode
   class Workspace
@@ -95,6 +96,7 @@ module Vibecode
 
     def run_ruby(path)
       full_path = safe_path(path)
+
       return {
         stdout: "",
         stderr: "File does not exist: #{path}",
@@ -104,6 +106,7 @@ module Vibecode
       } unless File.exist?(full_path)
 
       content = File.read(full_path)
+
       unless ruby_executable_content?(content)
         return {
           stdout: "",
@@ -114,7 +117,36 @@ module Vibecode
         }
       end
 
+      interactive = content.match?(/\bgets\b|\bSTDIN\b|curses|io\/console|readline/)
+
+      if interactive
+        puts "▶️  Launching interactive Ruby program (Ctrl+C to exit)..."
+        system("ruby", full_path)
+        status = $?
+
+        puts "\n▶️  Program exited. Restoring terminal..."
+
+        if File.exist?("/dev/tty")
+          STDIN.reopen("/dev/tty")
+          STDOUT.reopen("/dev/tty")
+          STDERR.reopen("/dev/tty")
+        end
+
+        system("stty sane") if system("which stty > /dev/null 2>&1")
+
+    puts "▶️  Returning to Vibecode..."
+
+        return {
+          stdout: "",
+          stderr: "",
+          status: status,
+          command: "ruby #{path}",
+          skipped: false
+        }
+      end
+
       stdout, stderr, status = Open3.capture3("ruby #{full_path}", chdir: @root)
+
       {
         stdout: stdout,
         stderr: stderr,

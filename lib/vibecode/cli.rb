@@ -20,7 +20,6 @@ module Vibecode
 
     def initialize
       @pastel = Pastel.new
-      @prompt = TTY::Prompt.new
       ensure_config!
       @config = load_config
       @ollama = OllamaClient.new
@@ -57,7 +56,13 @@ module Vibecode
       )
 
       loop do
-        input = @prompt.ask(@pastel.green("vibecode> "), required: false)
+        begin
+          @prompt = TTY::Prompt.new
+          input = @prompt.ask(@pastel.green("vibecode> "), required: false)
+        rescue TTY::Reader::InputInterrupt
+          puts "\nExiting Vibecode..."
+          exit
+        end
         break if input.nil? || input.strip.downcase == "exit"
 
         spinner = TTY::Spinner.new("[:spinner] Thinking...", format: :dots)
@@ -145,4 +150,3 @@ module Vibecode
     end
   end
 end
-
